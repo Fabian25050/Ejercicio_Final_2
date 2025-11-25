@@ -1,0 +1,46 @@
+import json
+from datetime import datetime
+
+class Usuario:
+    def __init__(self, nombre_usuario, contrasena):
+        self.nombre = nombre_usuario
+        self.contrasena = contrasena
+        self.tareas = ()
+
+    def crear_tarea(self):
+        a = input("Introduce el nombre de la Tarea: ")
+        b = input("Introduce la descripción de la Tarea: ")
+        c = input("Introduce la fecha de vencimiento de la Tarea: ")
+        tarea = Tareas(a, b, c)
+        self.tareas = (self.tareas, tarea)
+
+    def editar_tarea(self, nombre_tarea_editar):
+        pass
+
+        
+
+class Tareas:
+    def __init__(self, nombre_tarea, descripcion, fecha_vencimiento):
+        self.nombre_tarea = nombre_tarea
+        self.descripcion = descripcion
+        self.fecha_vencimiento = fecha_vencimiento
+        self.completado = False
+
+    def editar_tarea(self, nuevo_nombre, nueva_descripcion, nueva_fv):
+        self.nombre_tarea = nuevo_nombre
+        self.descripcion = nueva_descripcion
+        self.fecha_vencimiento = nueva_fv
+
+    def completar_tarea(self):
+        self.completado = True
+
+
+
+class Gestor:
+    def __init__(self, ):
+        pass
+    
+
+
+
+
