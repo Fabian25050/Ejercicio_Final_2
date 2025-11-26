@@ -5,17 +5,18 @@ class Usuario:
     def __init__(self, nombre_usuario, contrasena):
         self.nombre = nombre_usuario
         self.contrasena = contrasena
-        self.tareas = ()
+        self.tareas = []
 
     def crear_tarea(self):
-        a = input("Introduce el nombre de la Tarea: ")
-        b = input("Introduce la descripción de la Tarea: ")
-        c = input("Introduce la fecha de vencimiento de la Tarea: ")
-        tarea = Tareas(a, b, c)
-        self.tareas = (self.tareas, tarea)
+        nombre = input("Introduce el nombre de la Tarea: ")
+        descripcion = input("Introduce la descripción de la Tarea: ")
+        fecha = input("Introduce la fecha de vencimiento de la Tarea (AAAA-MM-DD): ")
+        tarea = Tareas(nombre, descripcion, fecha)
+        self.tareas.append(tarea)
 
-    def editar_tarea(self, nombre_tarea_editar):
-        pass
+    def eliminar_tarea(self, nombre_tarea):
+        self.tareas = (tarea for tarea in self.tareas if tarea != nombre_tarea)
+
 
         
 
@@ -37,9 +38,67 @@ class Tareas:
 
 
 class Gestor:
-    def __init__(self, ):
-        pass
-    
+    def __init__(self, nombre_archivo = "Datos de proyecto.json"):
+        self.usuarios = {}
+        self.nombre_archivo = nombre_archivo
+        self.cargar_datos()
+
+
+    def cargar_datos(self):
+        try:
+            with open(self.nombre_archivo, "r") as archivo:
+                datos = json.load(archivo)
+                for nombre_usuario, datos_usuario in datos.items:
+                    usuario = Usuario(nombre_usuario, datos_usuario["contrasena"])
+                    for contrasena, lista_tareas in datos_usuario:
+                        tarea = Tareas(lista_tareas["nombre_tarea"], lista_tareas["descripcion"], lista_tareas["fecha_vencimiento"])
+                        tarea.completado = lista_tareas["completado"]
+                        usuario.crear_tarea(tarea)
+                    self.usuarios[nombre_usuario] = usuario
+
+        except FileNotFoundError:
+           print("No se encontro el archivo, se va a crear uno.") 
+
+    def guardar_datos(self):
+        with open(self.nombre_archivo, "w") as archivo:
+            datos_guardados = {}
+            for usuario, datos in self.usuarios.items:
+                datos_guardados[usuario] = {
+                    "contrasena": datos.contrasena,
+                    "tareas": [{
+                        "nombre_tarea": tarea.nombre_tarea,
+                        "descripcion": tarea.descripcion,
+                        "fecha_vencimiento": tarea.fecha_vencimiento,
+                        "completado": tarea.completado
+                    } for tarea in datos.tareas]
+                }
+            json.dump(archivo, datos_guardados)
+
+
+
+
+if __name__ == "__main__":
+    systema = Gestor()
+    while(True):
+        print("Este es el sistema gestor de tareas V1.0, eliga una de las opciones para continuar:")
+        print("\n1. Iniciar sesión")
+        print("\n2. Registrarse")
+        print("\n3. Salir")
+        menu_p = input("Introduzca el número de su elección: ")
+
+        if menu_p == 1:
+            usuario_m = input("Introduzca su nombre de usuario: ")
+            contrasena_m = input("Introduzca su contraseña: ")
+            
+
+        if menu_p == 2:
+            print("Para la creación ")
+        
+
+
+fabian = Usuario("fabian", 1234)
+fabian.crear_tarea()
+fabian.eliminar_tarea("a")
 
 
 
