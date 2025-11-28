@@ -7,11 +7,7 @@ class Usuario:
         self.contrasena = contrasena
         self.tareas = []
 
-    def crear_tarea(self):
-        nombre = input("Introduce el nombre de la Tarea: ")
-        descripcion = input("Introduce la descripción de la Tarea: ")
-        fecha = input("Introduce la fecha de vencimiento de la Tarea (AAAA-MM-DD): ")
-        tarea = Tareas(nombre, descripcion, fecha)
+    def agregar_tarea(self, tarea):
         self.tareas.append(tarea)
 
     def eliminar_tarea(self, nombre_tarea):
@@ -50,10 +46,10 @@ class Gestor:
                 datos = json.load(archivo)
                 for nombre_usuario, datos_usuario in datos.items:
                     usuario = Usuario(nombre_usuario, datos_usuario["contrasena"])
-                    for contrasena, lista_tareas in datos_usuario:
+                    for contrasena, lista_tareas in datos_usuario.items:
                         tarea = Tareas(lista_tareas["nombre_tarea"], lista_tareas["descripcion"], lista_tareas["fecha_vencimiento"])
                         tarea.completado = lista_tareas["completado"]
-                        usuario.crear_tarea(tarea)
+                        usuario.agregar_tarea(tarea)
                     self.usuarios[nombre_usuario] = usuario
 
         except FileNotFoundError:
@@ -62,8 +58,8 @@ class Gestor:
     def guardar_datos(self):
         with open(self.nombre_archivo, "w") as archivo:
             datos_guardados = {}
-            for usuario, datos in self.usuarios.items:
-                datos_guardados[usuario] = {
+            for nombre_usr, datos in self.usuarios.items:
+                datos_guardados[nombre_usr] = {
                     "contrasena": datos.contrasena,
                     "tareas": [{
                         "nombre_tarea": tarea.nombre_tarea,
@@ -72,7 +68,25 @@ class Gestor:
                         "completado": tarea.completado
                     } for tarea in datos.tareas]
                 }
+
             json.dump(archivo, datos_guardados)
+
+    def registrar_usuario(self, usuario, contrasena):
+        if usuario in self.usuarios:
+            print("Este usuario ya esta registrado")
+            return False
+        
+        self.usuarios[usuario] = Usuario(usuario, contrasena)
+        self.guardar_datos()
+        return True
+    
+    def iniciar_sesion(self, nombre_usuario, contrasena):
+        usuario = self.usuarios.get(nombre_usuario)
+        if usuario and usuario.contrasena == contrasena:
+            print(f"Bienvenido {nombre_usuario}")
+            return usuario
+        print("Usuario no registrado")
+        return None
 
 
 
