@@ -14,7 +14,19 @@ class Usuario:
         self.tareas = (tarea for tarea in self.tareas if tarea != nombre_tarea)
 
 
-        
+    def mostrar_tareas(self):
+        if self.tareas:
+            i = 1
+            for tarea in self.tareas:
+                print(f"{i}. {tarea.nombre_tarea}: {tarea.descripcion}, con fecha de vencimiento {tarea.fecha_vencimiento}.")
+                i =+ 1
+            
+            for num, info in enumerate(tarea, start=1):
+                print(f"{num}. {info.nombre_tarea}: {info.descripcion}, con fecha de vencimiento {info.fecha_vencimiento}.")
+
+        else:
+            print("No tienes tareas")
+
 
 class Tareas:
     def __init__(self, nombre_tarea, descripcion, fecha_vencimiento):
@@ -30,6 +42,7 @@ class Tareas:
 
     def completar_tarea(self):
         self.completado = True
+        
 
 
 
@@ -87,6 +100,34 @@ class Gestor:
             return usuario
         print("Usuario no registrado")
         return None
+    
+    def menu_sistema(self, usuario):
+        while(True):
+            print("Menu de usuario, seleccione una opción:")
+            print("1. Crear una tarea")
+            print("2. Editar una tarea")
+            print("3. Ver tareas")
+            print("4. Salir")
+            menu_s = input("Introduzca la opción que desee realizar: ")
+
+            if menu_s == 1:
+                tarea_titulo = input("Introduzca el título de la tarea: ")
+                tarea_descripcion = input("Introduzca la descripción de la tarea: ")
+                tarea_fecha_vencimiento = input("Introduzca la fecha de vencimiento de la tarea:")
+                tarea = Tareas(tarea_titulo, tarea_descripcion, tarea_fecha_vencimiento)
+                usuario.agregar_tarea(tarea)
+                self.guardar_datos()
+
+            if menu_s == 2:
+                usuario.mostrar_tareas()
+                tarea_antigua = input("Cual es la tarea que quieres modificar? (número): ")
+                tarea_2 = usuario.tareas[tarea_antigua + 1] 
+                tarea_titulo = input("Introduzca el nuevo título de la tarea: ")
+                tarea_descripcion = input("Introduzca la nueva descripción de la tarea: ")
+                tarea_fecha_vencimiento = input("Introduzca la nueva fecha de vencimiento de la tarea:")
+                tarea_2.editar_tarea(tarea_titulo, tarea_descripcion, tarea_fecha_vencimiento)
+                self.guardar_datos()
+
 
 
 
@@ -103,6 +144,9 @@ if __name__ == "__main__":
         if menu_p == 1:
             usuario_m = input("Introduzca su nombre de usuario: ")
             contrasena_m = input("Introduzca su contraseña: ")
+
+
+            systema.menu_sistema(usuario)
             
 
         if menu_p == 2:
