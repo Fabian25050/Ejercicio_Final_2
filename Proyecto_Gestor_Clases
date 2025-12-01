@@ -15,17 +15,8 @@ class Usuario:
 
 
     def mostrar_tareas(self):
-        if self.tareas:
-            i = 1
-            for tarea in self.tareas:
-                print(f"{i}. {tarea.nombre_tarea}: {tarea.descripcion}, con fecha de vencimiento {tarea.fecha_vencimiento}.")
-                i =+ 1
-            
-            for num, info in enumerate(tarea, start=1):
-                print(f"{num}. {info.nombre_tarea}: {info.descripcion}, con fecha de vencimiento {info.fecha_vencimiento}.")
-
-        else:
-            print("No tienes tareas")
+        return self.tareas
+        
 
 
 class Tareas:
@@ -96,7 +87,7 @@ class Gestor:
     def iniciar_sesion(self, nombre_usuario, contrasena):
         usuario = self.usuarios.get(nombre_usuario)
         if usuario and usuario.contrasena == contrasena:
-            print(f"Bienvenido {nombre_usuario}")
+            print(f"Bienvenido {usuario.nombre}")
             return usuario
         print("Usuario no registrado")
         return None
@@ -107,7 +98,9 @@ class Gestor:
             print("1. Crear una tarea")
             print("2. Editar una tarea")
             print("3. Ver tareas")
-            print("4. Salir")
+            print("4. Eliminar una tarea")
+            print("5. Completar una tarea")
+            print("6. Salir")
             menu_s = input("Introduzca la opción que desee realizar: ")
 
             if menu_s == 1:
@@ -119,14 +112,72 @@ class Gestor:
                 self.guardar_datos()
 
             if menu_s == 2:
-                usuario.mostrar_tareas()
+                mostrar_tareas_funcion(usuario.mostrar_tareas())
                 tarea_antigua = input("Cual es la tarea que quieres modificar? (número): ")
-                tarea_2 = usuario.tareas[tarea_antigua + 1] 
-                tarea_titulo = input("Introduzca el nuevo título de la tarea: ")
-                tarea_descripcion = input("Introduzca la nueva descripción de la tarea: ")
-                tarea_fecha_vencimiento = input("Introduzca la nueva fecha de vencimiento de la tarea:")
-                tarea_2.editar_tarea(tarea_titulo, tarea_descripcion, tarea_fecha_vencimiento)
-                self.guardar_datos()
+                if usuario.tareas[tarea_antigua + 1]:
+                    tarea = usuario.tareas[tarea_antigua + 1] 
+                    tarea_titulo = input("Introduzca el nuevo título de la tarea: ")
+                    tarea_descripcion = input("Introduzca la nueva descripción de la tarea: ")
+                    tarea_fecha_vencimiento = input("Introduzca la nueva fecha de vencimiento de la tarea:")
+                    tarea.editar_tarea(tarea_titulo, tarea_descripcion, tarea_fecha_vencimiento)
+                    self.guardar_datos()
+                else:
+                    print("Tareas invalida, regresando a menú de usuario.")
+
+
+            if menu_s == 3:
+                tareas = usuario.mostrar_tareas()
+                mostrar_tareas_funcion(tareas)
+
+            if menu_s == 4:
+                mostrar_tareas_funcion(usuario.mostrar_tareas())
+                tarea_eliminar = input("Cual es la tarea que quieres eliminar? (número): ")
+                if usuario.tareas[tarea_eliminar + 1]:
+                    tarea = usuario.tareas[tarea_eliminar + 1]
+                    usuario.eliminar_tarea()
+                    print("Tarea eliminada.")
+                    mostrar_tareas_funcion(usuario.mostrar_tareas())
+                    self.guardar_datos()
+
+                else:
+                    print("Tareas invalida, regresando a menú de usuario.")
+
+            if menu_s == 5:
+                mostrar_tareas_funcion(usuario.mostrar_tareas())
+                tarea_completar = input("Cual es la tarea que quieres completar? (número): ")
+                if usuario.tareas[tarea_completar + 1]:
+                    tarea = usuario.tareas[tarea_completar + 1]
+                    if tarea.completar_tarea():
+                        print("Tarea completada exitosamente, bien hecho.")
+                        mostrar_tareas_funcion(usuario.mostrar_tareas())
+                        self.guardar_datos()
+                    
+                    else:
+                        print("No se pudo hacer esta acción.")
+                else:
+                    print("Tareas invalida, regresando a menú de usuario.")
+
+            if menu_s == 6:
+                print("Saliendo de la cuenta de usuario.")
+                break
+
+                
+
+
+
+def mostrar_tareas_funcion(tareas):
+    if tareas:
+        i = 1
+        for tarea in tareas:
+            print(f"{i}. {tarea.nombre_tarea}: {tarea.descripcion}, con fecha de vencimiento {tarea.fecha_vencimiento}.")
+            i =+ 1
+            
+        for num, info in enumerate(tareas, start=1):
+            print(f"{num}. {info.nombre_tarea}: {info.descripcion}, con fecha de vencimiento {info.fecha_vencimiento}.")
+
+    else:
+        print("No tienes tareas")
+
 
 
 
@@ -139,24 +190,28 @@ if __name__ == "__main__":
         print("\n1. Iniciar sesión")
         print("\n2. Registrarse")
         print("\n3. Salir")
-        menu_p = input("Introduzca el número de su elección: ")
+        menu_p = input("Introduzca la opción de su elección: ")
 
         if menu_p == 1:
             usuario_m = input("Introduzca su nombre de usuario: ")
             contrasena_m = input("Introduzca su contraseña: ")
-
-
-            systema.menu_sistema(usuario)
-            
+            usuario = systema.iniciar_sesion(usuario_m, contrasena_m)
+            if usuario:
+                systema.menu_sistema(usuario)
 
         if menu_p == 2:
-            print("Para la creación ")
+            usuario_r = input("Para registrarse primero ingrese su nombre de usuario: ")
+            contrasena_r = input("Ahora ingrese su contraseña: ")
+
+            systema.registrar_usuario(usuario_r, contrasena_r)
+
+
+        if menu_p == 3:
+            print("Gestor de tareas terminado, que tenga buen día.")
+            break
+            
         
 
-
-fabian = Usuario("fabian", 1234)
-fabian.crear_tarea()
-fabian.eliminar_tarea("a")
 
 
 
