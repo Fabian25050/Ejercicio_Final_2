@@ -11,7 +11,7 @@ class Usuario:
         self.tareas.append(tarea)
 
     def eliminar_tarea(self, nombre_tarea):
-        self.tareas = (tarea for tarea in self.tareas if tarea != nombre_tarea)
+        self.tareas = (tarea for tarea in self.tareas if tarea.nombre_tarea != nombre_tarea)
 
 
     def mostrar_tareas(self):
@@ -48,9 +48,9 @@ class Gestor:
         try:
             with open(self.nombre_archivo, "r") as archivo:
                 datos = json.load(archivo)
-                for nombre_usuario, datos_usuario in datos.items:
+                for nombre_usuario, datos_usuario in datos.items():
                     usuario = Usuario(nombre_usuario, datos_usuario["contrasena"])
-                    for contrasena, lista_tareas in datos_usuario.items:
+                    for lista_tareas in datos_usuario["tareas"]:
                         tarea = Tareas(lista_tareas["nombre_tarea"], lista_tareas["descripcion"], lista_tareas["fecha_vencimiento"])
                         tarea.completado = lista_tareas["completado"]
                         usuario.agregar_tarea(tarea)
@@ -60,20 +60,21 @@ class Gestor:
            print("No se encontro el archivo, se va a crear uno.") 
 
     def guardar_datos(self):
+        
+        datos_guardados = {}
+        for nombre_usr, datos in self.usuarios.items():
+            datos_guardados[nombre_usr] = {
+                "contrasena": datos.contrasena,
+                "tareas": [{
+                    "nombre_tarea": tarea.nombre_tarea,
+                    "descripcion": tarea.descripcion,
+                    "fecha_vencimiento": tarea.fecha_vencimiento,
+                    "completado": tarea.completado
+                } for tarea in datos.tareas]
+            }
+                
         with open(self.nombre_archivo, "w") as archivo:
-            datos_guardados = {}
-            for nombre_usr, datos in self.usuarios.items:
-                datos_guardados[nombre_usr] = {
-                    "contrasena": datos.contrasena,
-                    "tareas": [{
-                        "nombre_tarea": tarea.nombre_tarea,
-                        "descripcion": tarea.descripcion,
-                        "fecha_vencimiento": tarea.fecha_vencimiento,
-                        "completado": tarea.completado
-                    } for tarea in datos.tareas]
-                }
-
-            json.dump(archivo, datos_guardados)
+            json.dump(datos_guardados, archivo)
 
     def registrar_usuario(self, usuario, contrasena):
         if usuario in self.usuarios:
@@ -103,19 +104,18 @@ class Gestor:
             print("6. Salir")
             menu_s = input("Introduzca la opción que desee realizar: ")
 
-            if menu_s == 1:
+            if menu_s == "1":
                 tarea_titulo = input("Introduzca el título de la tarea: ")
                 tarea_descripcion = input("Introduzca la descripción de la tarea: ")
-                tarea_fecha_vencimiento = input("Introduzca la fecha de vencimiento de la tarea:")
+                tarea_fecha_vencimiento = input("Introduzca la fecha de vencimiento de la tarea (DD-MM-AAAA):")
                 tarea = Tareas(tarea_titulo, tarea_descripcion, tarea_fecha_vencimiento)
                 usuario.agregar_tarea(tarea)
                 self.guardar_datos()
 
-            if menu_s == 2:
-                mostrar_tareas_funcion(usuario.mostrar_tareas())
-                tarea_antigua = input("Cual es la tarea que quieres modificar? (número): ")
-                if usuario.tareas[tarea_antigua + 1]:
-                    tarea = usuario.tareas[tarea_antigua + 1] 
+            if menu_s == "2":
+                tarea_antigua = input("Cual es la tarea que quieres modificar? (título): ")
+                tarea = next((t for t in usuario.tareas if t.nombre_tarea == tarea_antigua), None)
+                if tarea:
                     tarea_titulo = input("Introduzca el nuevo título de la tarea: ")
                     tarea_descripcion = input("Introduzca la nueva descripción de la tarea: ")
                     tarea_fecha_vencimiento = input("Introduzca la nueva fecha de vencimiento de la tarea:")
@@ -125,39 +125,30 @@ class Gestor:
                     print("Tareas invalida, regresando a menú de usuario.")
 
 
-            if menu_s == 3:
+            if menu_s == "3":
                 tareas = usuario.mostrar_tareas()
                 mostrar_tareas_funcion(tareas)
 
-            if menu_s == 4:
-                mostrar_tareas_funcion(usuario.mostrar_tareas())
-                tarea_eliminar = input("Cual es la tarea que quieres eliminar? (número): ")
-                if usuario.tareas[tarea_eliminar + 1]:
-                    tarea = usuario.tareas[tarea_eliminar + 1]
-                    usuario.eliminar_tarea()
-                    print("Tarea eliminada.")
-                    mostrar_tareas_funcion(usuario.mostrar_tareas())
+            if menu_s == "4":
+                tarea_eliminar = input("Cual es la tarea que quieres eliminar? (título): ")
+                tarea = next((t for t in usuario.tareas if t.nombre_tarea == tarea_eliminar), None)
+                if tarea:
+                    usuario.eliminar_tarea(tarea_eliminar)
                     self.guardar_datos()
 
                 else:
                     print("Tareas invalida, regresando a menú de usuario.")
 
-            if menu_s == 5:
-                mostrar_tareas_funcion(usuario.mostrar_tareas())
-                tarea_completar = input("Cual es la tarea que quieres completar? (número): ")
-                if usuario.tareas[tarea_completar + 1]:
-                    tarea = usuario.tareas[tarea_completar + 1]
-                    if tarea.completar_tarea():
-                        print("Tarea completada exitosamente, bien hecho.")
-                        mostrar_tareas_funcion(usuario.mostrar_tareas())
-                        self.guardar_datos()
-                    
-                    else:
-                        print("No se pudo hacer esta acción.")
+            if menu_s == "5":
+                tarea_completar = input("Cual es la tarea que quieres completar? (título): ")
+                tarea = next((t for t in usuario.tareas if t.nombre_tarea == tarea_completar), None)
+                if tarea:
+                    tarea.completar_tarea()
+                    self.guardar_datos()
                 else:
                     print("Tareas invalida, regresando a menú de usuario.")
 
-            if menu_s == 6:
+            if menu_s == "6":
                 print("Saliendo de la cuenta de usuario.")
                 break
 
@@ -167,13 +158,11 @@ class Gestor:
 
 def mostrar_tareas_funcion(tareas):
     if tareas:
-        i = 1
-        for tarea in tareas:
-            print(f"{i}. {tarea.nombre_tarea}: {tarea.descripcion}, con fecha de vencimiento {tarea.fecha_vencimiento}.")
-            i =+ 1
-            
+        print("\n---------------------Tareas del Usuario---------------------")    
         for num, info in enumerate(tareas, start=1):
-            print(f"{num}. {info.nombre_tarea}: {info.descripcion}, con fecha de vencimiento {info.fecha_vencimiento}.")
+            estado = "Completado" if info.completado == 1 else "pendiente"
+            print(f"{num}. {info.nombre_tarea}: {info.descripcion}, con fecha de vencimiento {info.fecha_vencimiento}, estado: {estado}")
+        print("\n------------------------------------------------------------")
 
     else:
         print("No tienes tareas")
@@ -187,26 +176,26 @@ if __name__ == "__main__":
     systema = Gestor()
     while(True):
         print("Este es el sistema gestor de tareas V1.0, eliga una de las opciones para continuar:")
-        print("\n1. Iniciar sesión")
-        print("\n2. Registrarse")
-        print("\n3. Salir")
+        print("1. Iniciar sesión")
+        print("2. Registrarse")
+        print("3. Salir")
         menu_p = input("Introduzca la opción de su elección: ")
 
-        if menu_p == 1:
+        if menu_p == "1":
             usuario_m = input("Introduzca su nombre de usuario: ")
             contrasena_m = input("Introduzca su contraseña: ")
             usuario = systema.iniciar_sesion(usuario_m, contrasena_m)
             if usuario:
                 systema.menu_sistema(usuario)
 
-        if menu_p == 2:
+        if menu_p == "2":
             usuario_r = input("Para registrarse primero ingrese su nombre de usuario: ")
             contrasena_r = input("Ahora ingrese su contraseña: ")
 
             systema.registrar_usuario(usuario_r, contrasena_r)
 
 
-        if menu_p == 3:
+        if menu_p == "3":
             print("Gestor de tareas terminado, que tenga buen día.")
             break
             
