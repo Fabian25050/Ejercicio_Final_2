@@ -118,7 +118,7 @@ class Gestor:
                 if tarea:
                     tarea_titulo = input("Introduzca el nuevo título de la tarea: ")
                     tarea_descripcion = input("Introduzca la nueva descripción de la tarea: ")
-                    tarea_fecha_vencimiento = input("Introduzca la nueva fecha de vencimiento de la tarea:")
+                    tarea_fecha_vencimiento = input("Introduzca la nueva fecha de vencimiento de la tarea (DD-MM-AAAA):")
                     tarea.editar_tarea(tarea_titulo, tarea_descripcion, tarea_fecha_vencimiento)
                     self.guardar_datos()
                 else:
